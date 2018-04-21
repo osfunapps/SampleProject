@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/papa_view"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    >
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/countries_rv"
+        android:layout_width="match_parent"
+        android:drawSelectorOnTop="true"
+        android:divider="@null"
+        android:layout_height="match_parent"
+        />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/countries_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_plus"
+        app:backgroundTint="@color/colorAccent"
+        />
+
+
+
+    <Button
+        android:id="@+id/run_random_btn"
+        android:layout_width="250dp"
+        android:layout_height="150dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="18dp"
+        android:text="@string/random"
+        android:padding="12dp"
+        android:textSize="15sp"
+        android:background="@drawable/form_btn_bg"
+        android:gravity="center"
+        android:textColor="#ffffff"
+        />
+
+    <LinearLayout
+        android:id="@+id/click_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        >
+
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>
