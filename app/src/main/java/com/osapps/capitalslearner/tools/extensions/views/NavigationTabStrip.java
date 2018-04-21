@@ -43,7 +43,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
 
 import com.osapps.capitalslearner.R;
-import com.osapps.capitalslearner.main.model.ListObjFactory;
+import com.osapps.capitalslearner.main.listfragment.model.states.ListStateFactory;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -104,7 +104,7 @@ public class NavigationTabStrip extends View implements ViewPager.OnPageChangeLi
 
     // NTS titles
     private String[] mTitles;
-    private ListObjFactory.ListObjType[] mTypes;
+    private ListStateFactory.ListStateType[] mTypes;
 
 
     // Variables for ViewPager
@@ -280,7 +280,7 @@ public class NavigationTabStrip extends View implements ViewPager.OnPageChangeLi
         requestLayout();
     }
 
-    public void setTypes(final ListObjFactory.ListObjType[] types) {
+    public void setTypes(final ListStateFactory.ListStateType[] types) {
         mTypes = types;
         requestLayout();
     }
@@ -893,6 +893,6 @@ public class NavigationTabStrip extends View implements ViewPager.OnPageChangeLi
     public interface OnTabStripSelectedIndexListener {
         void onStartTabSelected(final String title, final int index);
 
-        void onEndTabSelected(final String title, final ListObjFactory.ListObjType type, final int index);
+        void onEndTabSelected(final String title, final ListStateFactory.ListStateType type, final int index);
     }
 }

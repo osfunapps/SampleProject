@@ -3,7 +3,7 @@ package com.osapps.capitalslearner.main.presentation.tabs
 import com.osapps.capitalslearner.infrastructure.LocalRepository
 import com.osapps.capitalslearner.infrastructure.LocalRepositoryBank
 import com.osapps.capitalslearner.main.model.ListObj
-import com.osapps.capitalslearner.main.model.ListObjFactory
+import com.osapps.capitalslearner.main.listfragment.model.states.ListStateFactory
 import com.osapps.capitalslearner.main.view.TabsView
 import javax.inject.Inject
 
@@ -19,7 +19,7 @@ class TabStripHandler: TabsOrders {
 
     //first tab styles
     private val FIRST_TAB_DEF_NAME: String = "Titles"
-    private val FIRST_TAB_DEF_TYPE: ListObjFactory.ListObjType = ListObjFactory.ListObjType.DEFINITION_STYLE
+    private val FIRST_TAB_DEF_TYPE: ListStateFactory.ListStateType = ListStateFactory.ListStateType.DEFINITION_STYLE
 
     //This method meant to undress the tabs titles from the list of ListObjects.
     //(Every ListObj holds the type and the title so this method meant to strip the titles from all).
@@ -28,7 +28,7 @@ class TabStripHandler: TabsOrders {
     }
 
 
-    override fun getTabStripEntries(): Pair<Array<String>, Array<ListObjFactory.ListObjType>> {
+    override fun getTabStripEntries(): Pair<Array<String>, Array<ListStateFactory.ListStateType>> {
         var tabStripEntries = loadTabs()
         //if it's the first time the app loads, we will save the first pair
         if(tabStripEntries == null) {
@@ -39,7 +39,7 @@ class TabStripHandler: TabsOrders {
         return tabsAsPairs(tabStripEntries)
     }
 
-    override fun addTab(listObj: ListObj): Pair<Array<String>, Array<ListObjFactory.ListObjType>> {
+    override fun addTab(listObj: ListObj): Pair<Array<String>, Array<ListStateFactory.ListStateType>> {
         //get the list of objects from the local repo
         val tabStripEntries = loadTabs()!!
 
@@ -50,9 +50,9 @@ class TabStripHandler: TabsOrders {
     }
 
 
-    private fun tabsAsPairs(tabStripEntries: ArrayList<ListObj>): Pair<Array<String>, Array<ListObjFactory.ListObjType>> {
+    private fun tabsAsPairs(tabStripEntries: ArrayList<ListObj>): Pair<Array<String>, Array<ListStateFactory.ListStateType>> {
         val tabStripTitles = arrayOf<String>()
-        val tabStripTypes = arrayOf<ListObjFactory.ListObjType>()
+        val tabStripTypes = arrayOf<ListStateFactory.ListStateType>()
         for (i in 0 until tabStripEntries.size) {
             tabStripTitles[i] = tabStripEntries[i].title
             tabStripTypes[i] = tabStripEntries[i].type

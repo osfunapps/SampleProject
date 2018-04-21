@@ -1,11 +1,8 @@
 package com.osapps.capitalslearner.infrastructure
 
 import android.content.SharedPreferences
-import com.osapps.capitalslearner.main.countries.model.CountryObj
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.util.*
-import kotlin.collections.HashSet
 
 
 class SharedPrefsLocalRepository(private val preferences: SharedPreferences) : LocalRepository {

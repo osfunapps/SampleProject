@@ -1,7 +1,5 @@
 package com.osapps.capitalslearner.infrastructure
 
-import com.osapps.capitalslearner.main.countries.model.CountryObj
-
 interface LocalRepository{
 
 

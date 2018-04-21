@@ -3,9 +3,7 @@ package com.osapps.capitalslearner.main.view
 import android.os.Bundle
 
 import com.osapps.capitalslearner.R
-import com.osapps.capitalslearner.main.countries.view.CountriesFragment
 import com.osapps.capitalslearner.main.presentation.MainActivityPresenter
-import com.osapps.capitalslearner.tools.extensions.addFragment
 
 import javax.inject.Inject
 
@@ -19,10 +17,8 @@ import com.osapps.capitalslearner.tools.extensions.views.NavigationTabStrip
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import android.view.MenuItem
-import com.osapps.capitalslearner.main.model.ListObj
-import com.osapps.capitalslearner.main.model.ListObjFactory
+import com.osapps.capitalslearner.main.listfragment.model.states.ListStateFactory
 import com.osapps.capitalslearner.main.presentation.tabs.TabStripHandler
-import kotlin.collections.ArrayList
 
 
 private const val ACT_CHECK_TTS_DATA: Int = 999
@@ -84,7 +80,7 @@ class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.O
         }
     }
 
-    private fun refreshTabs(tabStripEntries: Pair<Array<String>, Array<ListObjFactory.ListObjType>>) {
+    private fun refreshTabs(tabStripEntries: Pair<Array<String>, Array<ListStateFactory.ListStateType>>) {
         tab_strip.titles = tabStripEntries.first
         tab_strip.setTypes(tabStripEntries.second)
     }
@@ -149,15 +145,9 @@ class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.O
         //set onclick
         tab_strip.onTabStripSelectedIndexListener = object : NavigationTabStrip.OnTabStripSelectedIndexListener {
             override fun onStartTabSelected(title: String, index: Int) {}
-            override fun onEndTabSelected(title: String?, type: ListObjFactory.ListObjType?, index: Int)
+            override fun onEndTabSelected(title: String?, type: ListStateFactory.ListStateType?, index: Int)
                     = presenter.onTabChanged(title!!, type!!)
 
-        }
-    }
-
-    override fun callCountriesListFragment() {
-        addFragment("countriesFragment", R.id.fragment_container) {
-            CountriesFragment.newInstance()
         }
     }
 

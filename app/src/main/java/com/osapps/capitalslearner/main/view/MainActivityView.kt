@@ -5,6 +5,5 @@ import com.osapps.capitalslearner.main.model.ListObj
 
 /** [MainActivity] **/
 interface MainActivityView : MainView, TabsView{
-    fun callCountriesListFragment()
     fun clickedSettings()
 }
