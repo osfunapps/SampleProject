@@ -49,7 +49,7 @@ class SharedPrefsLocalRepository(private val preferences: SharedPreferences) : L
     }
 */
 
- /*   override fun getCountriesList(key: String): ArrayList<CountryObj> {
+ /*   override fun getListObjList(key: String): ArrayList<CountryObj> {
         val json = preferences.getString(key, "")
         if(json != "") {
             val type = object : TypeToken<ArrayList<CountryObj>>() {}.type

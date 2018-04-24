@@ -1,7 +1,9 @@
 package com.osapps.capitalslearner.main.presentation
 
+import android.app.Activity
 import com.osapps.capitalslearner.infrastructure.LocalRepository
-import com.osapps.capitalslearner.main.model.ListObj
+import com.osapps.capitalslearner.infrastructure.LocalRepositoryBank
+import com.osapps.capitalslearner.main.model.TabObj
 import com.osapps.capitalslearner.main.listfragment.model.states.ListStateFactory
 import com.osapps.capitalslearner.main.presentation.tabs.TabsOrders
 import com.osapps.capitalslearner.main.view.MainActivityView
@@ -25,8 +27,8 @@ class MainActivityPresenterImpl @Inject constructor(var view: MainActivityView,
 
     override fun getTabStripEntries(): Pair<Array<String>, Array<ListStateFactory.ListStateType>> = tabsHandler.getTabStripEntries()
 
-    override fun onTabChanged(name: String, type: ListStateFactory.ListStateType) {
-        val listState = ListStateFactory.createListState(type)
+    override fun onTabChanged(activity: Activity, name: String, type: ListStateFactory.ListStateType) {
+        val listState = ListStateFactory.createListState(activity, type, name)
         navigator.toListFragment(listState)
     }
 
@@ -36,9 +38,12 @@ class MainActivityPresenterImpl @Inject constructor(var view: MainActivityView,
 
     /**todo: do the [AddTabDialog] here! **/
     override fun clickedAddTab() : Pair<Array<String>, Array<ListStateFactory.ListStateType>>{
-        //pop "new tab dialog". It should return a title and a type
+        //pop "new tab dialog". It should return a title, a returned type, a "from" and a "to"
         //this is only an example of the returned object:
-        val listObj = ListObj("Persian", ListStateFactory.ListStateType.TRANSLATION_STYLE)
+        val tabName = "Arabic Words"
+        val listObj = TabObj(tabName, ListStateFactory.ListStateType.TRANSLATION_STYLE)
+        val pairFromAndTo = Pair<String,String>("Arabic", "Hebrew")
+        localRepository.saveObject(LocalRepositoryBank.KEY_FROM_TO + tabName, pairFromAndTo)
         return tabsHandler.addTab(listObj)
     }
 

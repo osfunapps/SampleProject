@@ -17,7 +17,7 @@ interface LocalRepository{
 
     fun clear(key: String)
 
-    //fun saveCountriesList(countriesList: ArrayList<CountryObj>, key: String)
+    //fun saveCountriesList(listObjList: ArrayList<CountryObj>, key: String)
 
     //fun getTabStripEntries() : Array<String>
 

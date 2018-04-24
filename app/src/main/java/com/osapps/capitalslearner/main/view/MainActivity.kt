@@ -33,7 +33,6 @@ class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.O
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
@@ -142,11 +141,12 @@ class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.O
         //set the entries (titles and types)
         val tabStripEntries = presenter.getTabStripEntries()
         refreshTabs(tabStripEntries)
+
         //set onclick
         tab_strip.onTabStripSelectedIndexListener = object : NavigationTabStrip.OnTabStripSelectedIndexListener {
             override fun onStartTabSelected(title: String, index: Int) {}
             override fun onEndTabSelected(title: String?, type: ListStateFactory.ListStateType?, index: Int)
-                    = presenter.onTabChanged(title!!, type!!)
+                    = presenter.onTabChanged(this@MainActivity, title!!, type!!)
 
         }
     }

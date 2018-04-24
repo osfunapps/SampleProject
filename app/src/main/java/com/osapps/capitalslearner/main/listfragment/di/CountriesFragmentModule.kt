@@ -1,15 +1,15 @@
 package com.osapps.capitalslearner.main.listfragment.di
 
 import com.osapps.capitalslearner.dagger.scope.PerFragment
-import com.osapps.capitalslearner.main.listfragment.presentation.CountriesFragPresenter
-import com.osapps.capitalslearner.main.listfragment.presentation.CountriesFragPresenterImpl
-import com.osapps.capitalslearner.main.listfragment.presentation.list.CountriesAdapter
-import com.osapps.capitalslearner.main.listfragment.presentation.narrator.CountriesNarrator
+import com.osapps.capitalslearner.main.listfragment.presentation.ListFragPresenter
+import com.osapps.capitalslearner.main.listfragment.presentation.ListFragPresenterImpl
+import com.osapps.capitalslearner.main.listfragment.presentation.list.TranslationStateAdapter
+import com.osapps.capitalslearner.main.listfragment.presentation.narrator.Narrator
 import com.osapps.capitalslearner.main.listfragment.view.ListFragment
-import com.osapps.capitalslearner.main.listfragment.view.CountriesFragView
-import com.osapps.capitalslearner.main.listfragment.view.dialogs.AddCountryDialog
-import com.osapps.capitalslearner.main.listfragment.view.dialogs.CardDialog
-import com.osapps.capitalslearner.main.listfragment.view.dialogs.RemoveCountryDialog
+import com.osapps.capitalslearner.main.listfragment.view.ListFragView
+import com.osapps.capitalslearner.main.listfragment.view.dialogs.AddListObjDialog
+import com.osapps.capitalslearner.main.listfragment.view.dialogs.StateTranslationCardDialog
+import com.osapps.capitalslearner.main.listfragment.view.dialogs.StateTranslationRemoveListObjDialog
 
 import dagger.Module
 import dagger.Provides
@@ -31,43 +31,43 @@ import dagger.Provides
 class CountriesFragmentModule {
 
     @Provides
-    internal fun provideCountriesFragmentView(countriesFragment: ListFragment): CountriesFragView = countriesFragment
+    internal fun provideCountriesFragmentView(countriesFragment: ListFragment): ListFragView = countriesFragment
 
     @Provides
-    internal fun provideCountriesPresenterView(countriesFragPresenterImpl: CountriesFragPresenterImpl): CountriesFragPresenter = countriesFragPresenterImpl
+    internal fun provideCountriesPresenterView(countriesFragPresenterImpl: ListFragPresenterImpl): ListFragPresenter = countriesFragPresenterImpl
 
 
     //list adapter
     @Provides
-    internal fun provideAdapter(removeCountryDialog: RemoveCountryDialog): CountriesAdapter {
-        return CountriesAdapter {
-            removeCountryDialog.buildAndRun(it)
+    internal fun provideAdapter(removeWord: StateTranslationRemoveListObjDialog): TranslationStateAdapter {
+        return TranslationStateAdapter {
+            removeWord.buildAndRun(it)
             true
         }
     }
 
-    //add country dialog
+    //add word dialog
     @Provides
-    internal fun provideAddCountryDialog(countriesFragment: ListFragment): AddCountryDialog {
-        return AddCountryDialog(countriesFragment.activity, countriesFragment)
+    internal fun provideAddCountryDialog(countriesFragment: ListFragment): AddListObjDialog {
+        return AddListObjDialog(countriesFragment.activity, countriesFragment)
     }
 
-    //remove country dialog
+    //remove word dialog
     @Provides
-    internal fun provideRemoveCountryDialog(countriesFragment: ListFragment): RemoveCountryDialog {
-        return RemoveCountryDialog(countriesFragment.activity, countriesFragment)
+    internal fun provideRemoveCountryDialog(countriesFragment: ListFragment): StateTranslationRemoveListObjDialog {
+        return StateTranslationRemoveListObjDialog(countriesFragment.activity, countriesFragment)
     }
 
     //card dialog
     @Provides
-    internal fun provideCardDialog(countriesFragment: ListFragment): CardDialog {
-        return CardDialog(countriesFragment.activity, countriesFragment)
+    internal fun provideCardDialog(countriesFragment: ListFragment): StateTranslationCardDialog {
+        return StateTranslationCardDialog(countriesFragment.activity, countriesFragment)
     }
 
     //narrator
     @Provides
-    internal fun provideCountriesNarrator(): CountriesNarrator {
-        return CountriesNarrator()
+    internal fun provideCountriesNarrator(): Narrator {
+        return Narrator()
     }
 
 

@@ -7,19 +7,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.osapps.capitalslearner.R
+import com.osapps.capitalslearner.R.id.run_random_btn
 
-import com.osapps.capitalslearner.main.listfragment.presentation.CountriesFragPresenter
-import com.osapps.capitalslearner.main.listfragment.model.CountryObj
-import com.osapps.capitalslearner.main.listfragment.model.InterceptionTypes
+import com.osapps.capitalslearner.main.listfragment.presentation.ListFragPresenter
+import com.osapps.capitalslearner.main.listfragment.model.ListObj
 import com.osapps.capitalslearner.main.listfragment.model.states.ListState
 import com.osapps.capitalslearner.main.listfragment.model.states.STATE_SERIALIZABLE_ID
 
 import javax.inject.Inject
 
 import dagger.android.support.DaggerFragment
-import com.osapps.capitalslearner.main.listfragment.presentation.list.CountriesAdapter
-import com.osapps.capitalslearner.main.listfragment.view.dialogs.*
-import kotlinx.android.synthetic.main.country_list_item.view.*
+import com.osapps.capitalslearner.main.listfragment.view.dialogs.types.AddListObjDialogCallback
+import com.osapps.capitalslearner.main.listfragment.view.dialogs.types.CardDialogCallback
+import com.osapps.capitalslearner.main.listfragment.view.dialogs.types.RemoveListObjDialogCallback
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.translation_list_item.view.*
 import kotlinx.android.synthetic.main.fragment_countries.*
 
 
@@ -27,42 +29,52 @@ import kotlinx.android.synthetic.main.fragment_countries.*
  * Created by osApps on 02/06/2017.
  */
 
-class ListFragment : DaggerFragment(), CountriesFragView, AddCountryCallback, RemoveCountryCallback, CardDialogCallback {
-
+class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, RemoveListObjDialogCallback, CardDialogCallback {
     //list
     private lateinit var listView: RecyclerView
-    @Inject lateinit var mAdapter: CountriesAdapter
 
     //instances
-    @Inject lateinit var presenter: CountriesFragPresenter
-    @Inject lateinit var addCountryDialog: AddCountryDialog
-    @Inject lateinit var cardDialog: CardDialog
-    lateinit var listState: ListState
+    @Inject lateinit var presenter: ListFragPresenter
 
 
-    private var clickInterceptionType: InterceptionTypes = InterceptionTypes.COUNTRY
+    lateinit var state: ListState
+
+    private var clickInterceptionType: InterceptionTypes = InterceptionTypes.CARD_ONE
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setState()
+        toolbar.title = state.title()
         setViews()
-        presenter.onViewLoaded()
-
+        setDialogsCallback()
+        presenter.onViewLoaded() //list load, adapter load and more will be here
     }
 
-    private fun setState() { listState = arguments.getSerializable(STATE_SERIALIZABLE_ID) as ListState }
+    private fun setDialogsCallback() {
+        state.setAddDialogCallback(this)
+        state.setRemoveDialogCallback(this)
+        state.setCardDialogCallback(this)
+    }
+
+    override fun loadAdapter(listObjList: ArrayList<in ListObj>?) {
+        //load the adapter here
+        state.listAdapter().load(listObjList)
+    }
+
 
     private fun setViews() {
 
-        listView = view!!.findViewById<RecyclerView>(R.id.countries_rv).apply {
+        //list view
+        listView = view!!.findViewById<RecyclerView>(R.id.list_rv).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity)
-            //adapter = mAdapter
-            adapter = mAdapter
+            adapter = state.listAdapter().get()
         }
 
+
         //fab clicker
-        countries_fab.setOnClickListener { addCountryDialog.show() }
+        list_fab.setOnClickListener { state.addDialog().show() }
+        //list_fab.setOnClickListener { addCountryDialog.show() }
 
         //random btn clicker
         run_random_btn.setOnClickListener {
@@ -76,14 +88,13 @@ class ListFragment : DaggerFragment(), CountriesFragView, AddCountryCallback, Re
 
     }
 
-    override fun loadAdapter(countriesList: ArrayList<CountryObj>) = mAdapter.setItems(countriesList)
 
-    override fun onCountryChose(countryObj: CountryObj) = presenter.onCountryAdded(countryObj)
+    override fun onListUpdated() = state.listAdapter().notifyDataSetChanged()
 
-    override fun onListUpdated() = mAdapter.notifyDataSetChanged()
+    override fun onAddItemChose(listObj: ListObj) = presenter.onListObjAdded(listObj)
+    override fun onItemRemoveRequested(listObj: ListObj) = presenter.removeListObj(listObj)
 
-    override fun onCountryRemoveRequested(countryObj: CountryObj) = presenter.removeCountry(countryObj)
-
+    //todo: mark narrator
     override fun markNarratedCountry(narratedCountryIdx: Int) {
         listView.findViewHolderForAdapterPosition(narratedCountryIdx).itemView.list_item_papa.isSelected = true
     }
@@ -99,36 +110,39 @@ class ListFragment : DaggerFragment(), CountriesFragView, AddCountryCallback, Re
     }
 
 
+    override fun onCardContentGeneratedObj(listObj: ListObj, cardPos: Int): String = state.cardDialog().displayCard(listObj, cardPos)
+
+
     private fun onClickIntercepted() {
-        if (clickInterceptionType == InterceptionTypes.COUNTRY)
-            presenter.narrateNextCapital()
-        else if (clickInterceptionType == InterceptionTypes.CAPITAL) {
+        if (clickInterceptionType == InterceptionTypes.CARD_ONE)
+            presenter.narrateNextCardTwo()
+        else if (clickInterceptionType == InterceptionTypes.CARD_TWO) {
             //check if to disable from there the marking of the selected item (or leave it that way)
-            presenter.narrateNextCountry()
+            presenter.narrateNextCardOne()
         }
     }
 
     private fun onLongClickIntercepted(): Boolean {
-        if(clickInterceptionType == InterceptionTypes.COUNTRY)
-            presenter.narratePreviousCountry()
+        if(clickInterceptionType == InterceptionTypes.CARD_ONE)
+            presenter.narratePreviousCardOne()
         else
-            presenter.narratePreviousCapital()
+            presenter.narratePreviousCardTwo()
         return true
     }
 
+    //todo: list marking
     private fun unMarkAllCountries() {
-        val countriesCount = presenter.countriesList().size
+        val countriesCount = presenter.listOfObjList().size
         for (i in 0 until countriesCount) {
             listView.findViewHolderForAdapterPosition(i).itemView.list_item_papa.isSelected = false
         }
     }
 
-
-    override fun onNarrationDone() {
-        cardDialog.dismiss()
+    //todo: narration
+    override fun onCardsDone() {
+        state.cardDialog().dismiss()
         unMarkAllCountries()
         toggleRunBtnVisibility(View.VISIBLE)
-        //toggleClickInterception(View.GONE)
     }
 
     private fun toggleRunBtnVisibility(visibility: Int) {
@@ -137,39 +151,44 @@ class ListFragment : DaggerFragment(), CountriesFragView, AddCountryCallback, Re
 
 
     override fun popCardDialog() {
-        if(!cardDialog.isShowing)
-            cardDialog.show(InterceptionTypes.COUNTRY)
+        if(!state.cardDialog().isShowing)
+            state.cardDialog().show(InterceptionTypes.CARD_ONE)
     }
 
     override fun updateCardInput(interceptionType: InterceptionTypes, input: String) {
-        cardDialog.updateInput(interceptionType, input)
+        state.cardDialog().updateInput(interceptionType, input)
     }
 
 
     override fun onCardClicked(interceptionType: InterceptionTypes) {
         when(interceptionType){
-            InterceptionTypes.COUNTRY -> presenter.narrateNextCapital()
-            InterceptionTypes.CAPITAL -> presenter.narrateNextCountry()
+            InterceptionTypes.CARD_ONE -> presenter.narrateNextCardTwo()
+            InterceptionTypes.CARD_TWO -> presenter.narrateNextCardOne()
         }
     }
 
 
     override fun onCardLongClicked(interceptionType: InterceptionTypes): Boolean {
         when (interceptionType) {
-            InterceptionTypes.COUNTRY -> presenter.narratePreviousCountry()
-            InterceptionTypes.CAPITAL -> presenter.narratePreviousCapital()
+            InterceptionTypes.CARD_ONE -> presenter.narratePreviousCardOne()
+            InterceptionTypes.CARD_TWO -> presenter.narratePreviousCardTwo()
         }
         return true
     }
 
-
+    private fun setState() {
+        state = arguments.getSerializable(STATE_SERIALIZABLE_ID) as ListState
+        presenter.setState(state)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_countries, container, false)
     companion object {
-        fun newInstance(listState: ListState) {
+        fun newInstance(listState: ListState): ListFragment {
             val listStateBundle = Bundle()
             listStateBundle.putSerializable(STATE_SERIALIZABLE_ID, listState)
-            ListFragment().arguments = listStateBundle
+            val lf = ListFragment()
+            lf.arguments = listStateBundle
+            return lf
         }
     }
 }

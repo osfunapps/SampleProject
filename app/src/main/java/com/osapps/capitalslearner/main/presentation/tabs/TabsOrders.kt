@@ -1,6 +1,6 @@
 package com.osapps.capitalslearner.main.presentation.tabs
 
-import com.osapps.capitalslearner.main.model.ListObj
+import com.osapps.capitalslearner.main.model.TabObj
 import com.osapps.capitalslearner.main.listfragment.model.states.ListStateFactory
 import com.osapps.capitalslearner.main.view.TabsView
 
@@ -10,6 +10,6 @@ import com.osapps.capitalslearner.main.view.TabsView
 interface TabsOrders {
     fun setCallbackView(view: TabsView)
     fun getTabStripEntries(): Pair<Array<String>, Array<ListStateFactory.ListStateType>>
-    fun addTab(listObj: ListObj) :Pair<Array<String>, Array<ListStateFactory.ListStateType>>
+    fun addTab(listObj: TabObj) :Pair<Array<String>, Array<ListStateFactory.ListStateType>>
 
 }

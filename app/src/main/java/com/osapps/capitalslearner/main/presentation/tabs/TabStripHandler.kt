@@ -2,7 +2,7 @@ package com.osapps.capitalslearner.main.presentation.tabs
 
 import com.osapps.capitalslearner.infrastructure.LocalRepository
 import com.osapps.capitalslearner.infrastructure.LocalRepositoryBank
-import com.osapps.capitalslearner.main.model.ListObj
+import com.osapps.capitalslearner.main.model.TabObj
 import com.osapps.capitalslearner.main.listfragment.model.states.ListStateFactory
 import com.osapps.capitalslearner.main.view.TabsView
 import javax.inject.Inject
@@ -23,7 +23,7 @@ class TabStripHandler: TabsOrders {
 
     //This method meant to undress the tabs titles from the list of ListObjects.
     //(Every ListObj holds the type and the title so this method meant to strip the titles from all).
-    fun setTitles(tabStripEntries: ArrayList<ListObj>){
+    fun setTitles(tabStripEntries: ArrayList<TabObj>){
 
     }
 
@@ -39,7 +39,8 @@ class TabStripHandler: TabsOrders {
         return tabsAsPairs(tabStripEntries)
     }
 
-    override fun addTab(listObj: ListObj): Pair<Array<String>, Array<ListStateFactory.ListStateType>> {
+    override fun addTab(listObj: TabObj): Pair<Array<String>, Array<ListStateFactory.ListStateType>> {
+
         //get the list of objects from the local repo
         val tabStripEntries = loadTabs()!!
 
@@ -50,7 +51,7 @@ class TabStripHandler: TabsOrders {
     }
 
 
-    private fun tabsAsPairs(tabStripEntries: ArrayList<ListObj>): Pair<Array<String>, Array<ListStateFactory.ListStateType>> {
+    private fun tabsAsPairs(tabStripEntries: ArrayList<TabObj>): Pair<Array<String>, Array<ListStateFactory.ListStateType>> {
         val tabStripTitles = arrayOf<String>()
         val tabStripTypes = arrayOf<ListStateFactory.ListStateType>()
         for (i in 0 until tabStripEntries.size) {
@@ -62,17 +63,17 @@ class TabStripHandler: TabsOrders {
 
     }
 
-    private fun getFirstTab(): ArrayList<ListObj> {
-        val firstTabList = ArrayList<ListObj>()
-        firstTabList.add(ListObj(FIRST_TAB_DEF_NAME, FIRST_TAB_DEF_TYPE))
+    private fun getFirstTab(): ArrayList<TabObj> {
+        val firstTabList = ArrayList<TabObj>()
+        firstTabList.add(TabObj(FIRST_TAB_DEF_NAME, FIRST_TAB_DEF_TYPE))
         return firstTabList
     }
 
-    private fun loadTabs(): ArrayList<ListObj>? = localRepository.getObject(
+    private fun loadTabs(): ArrayList<TabObj>? = localRepository.getObject(
             LocalRepositoryBank.KEY_ALL_COUNTRIES_LIST,
-            ArrayList<ListObj>()::class.java)
+            ArrayList<TabObj>()::class.java)
 
-    private fun saveTabs(firstTabList: ArrayList<ListObj>) = localRepository.saveObject(LocalRepositoryBank.KEY_TABS_STRIP_ENTRIES, firstTabList)
+    private fun saveTabs(tabsList: ArrayList<TabObj>) = localRepository.saveObject(LocalRepositoryBank.KEY_TABS_STRIP_ENTRIES, tabsList)
 
 
 
