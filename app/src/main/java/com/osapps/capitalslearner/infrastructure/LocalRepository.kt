@@ -1,26 +1,27 @@
 package com.osapps.capitalslearner.infrastructure
 
+import com.osapps.capitalslearner.main.listfragment.model.states.types.translation.TranslationListObj
+import com.osapps.capitalslearner.main.model.TabObj
+import kotlin.reflect.KClass
+
 interface LocalRepository{
 
 
+    //getters
     fun getString(key: String): String?
     fun getBool(key: String): Boolean
+    fun getInt(key: String): Int
+
+    //setters
     fun saveBool(key: String, value: Boolean)
-    fun save(key: String, value: String?)
+    fun saveString(key: String, value: String?)
+    fun saveInt(key: String, int: Int)
 
-    //var itz = localRepository.getObject(LocalRepositoryBank.KEY_1, ArrayList<CountryObj>()::class.java)
-    fun <T> getObject(key: String, objType: Class<T>) : T?
-
-    //.saveObject(LocalRepositoryBank.MY_KEY, ArrayList<CountryObj>()::class.java)
+    //generics
     fun <T> saveObject(key: String, value: T?)
+    fun <T> getArrayListObject(key: String, clazz: Class<T>) : ArrayList<T>?
+    fun <T, E> getPair(key: String, firstObj: Class<T>, secondObj: Class<E>): Pair<T, E>?
 
-
-    fun clear(key: String)
-
-    //fun saveCountriesList(listObjList: ArrayList<CountryObj>, key: String)
-
-    //fun getTabStripEntries() : Array<String>
-
-
-    //fun saveTabStripEntries(tabStripEntries: Array<String>)
+    //cleaner
+    fun removeKey(key: String)
 }

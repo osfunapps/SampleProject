@@ -1,28 +1,29 @@
 package com.osapps.capitalslearner.main.listfragment.view
 
+import android.graphics.Color
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import com.osapps.capitalslearner.R
-import com.osapps.capitalslearner.R.id.run_random_btn
 
-import com.osapps.capitalslearner.main.listfragment.presentation.ListFragPresenter
 import com.osapps.capitalslearner.main.listfragment.model.ListObj
 import com.osapps.capitalslearner.main.listfragment.model.states.ListState
-import com.osapps.capitalslearner.main.listfragment.model.states.STATE_SERIALIZABLE_ID
+import com.osapps.capitalslearner.main.listfragment.model.states.ListStateType
+import com.osapps.capitalslearner.main.listfragment.presentation.ListFragPresenter
+import com.osapps.capitalslearner.main.listfragment.view.dialogs.types.*
 
 import javax.inject.Inject
 
 import dagger.android.support.DaggerFragment
-import com.osapps.capitalslearner.main.listfragment.view.dialogs.types.AddListObjDialogCallback
-import com.osapps.capitalslearner.main.listfragment.view.dialogs.types.CardDialogCallback
-import com.osapps.capitalslearner.main.listfragment.view.dialogs.types.RemoveListObjDialogCallback
-import kotlinx.android.synthetic.main.activity_main.*
+import com.osapps.capitalslearner.main.model.TabObj
+import com.osapps.capitalslearner.main.view.MainActivity
+import com.osapps.capitalslearner.tools.ToolBarActivity
+import com.osapps.capitalslearner.tools.extenstions.setViewsVisibility
+import com.osapps.capitalslearner.tools.views.NavigationTabStrip
 import kotlinx.android.synthetic.main.translation_list_item.view.*
-import kotlinx.android.synthetic.main.fragment_countries.*
+import kotlinx.android.synthetic.main.fragment_list.*
 
 
 /**
@@ -30,24 +31,91 @@ import kotlinx.android.synthetic.main.fragment_countries.*
  */
 
 class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, RemoveListObjDialogCallback, CardDialogCallback {
-    //list
-    private lateinit var listView: RecyclerView
-
     //instances
+    private lateinit var listView: RecyclerView
+    private lateinit var state: ListState
     @Inject lateinit var presenter: ListFragPresenter
 
 
-    lateinit var state: ListState
-
-    private var clickInterceptionType: InterceptionTypes = InterceptionTypes.CARD_ONE
-
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setState()
-        toolbar.title = state.title()
+        setToolbar()
+        list_fab.rippleColor = Color.WHITE;
+        setTabStripOnClicks()
+        presenter.setTabStrip()
+        setOnClicks()
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        menu?.findItem(R.id.action_add_tab)?.isVisible = true
+    }
+
+    //menu select
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        when (item.itemId) {
+            R.id.action_add_tab -> {
+                onAddTabClicked()
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun setToolbar() {
+        (activity!! as ToolBarActivity).toggleBackIcon(false)
+        (activity!! as ToolBarActivity).setToolBarTitle(getString(R.string.app_name))
+    }
+
+
+    private fun setTabStripOnClicks() {
+        tab_strip.onTabStripSelectedIndexListener = object : NavigationTabStrip.OnTabStripSelectedIndexListener{
+            override fun onStartTabSelected(title: String, index: Int) {}
+            override fun onTabSelected(title: String?, type: ListStateType?, index: Int) {
+                val clickedTab = TabObj(title!!, type!!)
+                presenter.onTabChanged(clickedTab)
+            }
+        }
+    }
+
+    override fun openLastClosedTab(lastCloseTabIdx: Int) = tab_strip.setTabIndex(lastCloseTabIdx, false)
+
+    override fun stateReady(state: ListState) {
+        this.state = state
+        state.setAdapter()
         setViews()
-        setDialogsCallback()
-        presenter.onViewLoaded() //list load, adapter load and more will be here
+        presenter.onStateViewsReady()
+    }
+
+
+
+    private fun onAddTabClicked() = AddTabDialog(activity!!, presenter).show()
+
+    override fun onFinishAddTab(updatedTabs: Pair<Array<String>, Array<ListStateType>> ){
+        refreshTabs(updatedTabs)
+        openLastClosedTab(presenter.getLastClosedTabIdx())
+    }
+
+    override fun prepareViewWithListItems() {
+        setViewsVisibility(View.GONE, add_list_obj)
+        setViewsVisibility(View.VISIBLE, list_fab, run_random_btn)
+    }
+
+    override fun onCardClicked(cardContent: String) = presenter.drawNextCard()
+    override fun onCardLongClicked(cardContent: String) = presenter.repeatCard()
+
+
+    override fun refreshTabs(tabStripEntries: Pair<Array<String>, Array<ListStateType>>) {
+        tab_strip.titles = tabStripEntries.first
+        tab_strip.setTypes(tabStripEntries.second)
+    }
+
+
+    private fun setDialogs() {
+        state.setAddDialog(activity!!)
+        state.setCardDialog(activity!!)
+        state.setRemoveDialog(activity!!)
     }
 
     private fun setDialogsCallback() {
@@ -71,25 +139,42 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
             adapter = state.listAdapter().get()
         }
 
+        setDialogs()
+        setDialogsCallback()
 
+    }
+
+
+    private fun setOnClicks() {
         //fab clicker
         list_fab.setOnClickListener { state.addDialog().show() }
         //list_fab.setOnClickListener { addCountryDialog.show() }
 
         //random btn clicker
         run_random_btn.setOnClickListener {
-            presenter.startRandomNarrationSequence()
-            toggleRunBtnVisibility(View.GONE)
+            if(presenter.listOfObjList().size != 0) {
+                presenter.startRandomCycleSequence()
+                setViewsVisibility(View.GONE, run_random_btn)
+            }
         }
 
-        //click interceptor
-        click_layout.setOnClickListener { onClickIntercepted() }
-        click_layout.setOnLongClickListener { onLongClickIntercepted() }
-
+        //big add button
+        add_list_obj.setOnClickListener { list_fab.callOnClick() }
+        add_tab_big_iv.setOnClickListener { onAddTabClicked() }
     }
 
+    override fun prepareViewWithoutTabs() {
+        setViewsVisibility(View.VISIBLE, add_tab_big_iv)
+        setViewsVisibility(View.GONE, list_fab, run_random_btn, add_list_obj)
+    }
 
+    override fun prepareViewWithoutListItems(){
+        setViewsVisibility(View.GONE, run_random_btn, add_tab_big_iv, list_fab)
+        setViewsVisibility(View.VISIBLE, add_list_obj)
+
+    }
     override fun onListUpdated() = state.listAdapter().notifyDataSetChanged()
+
 
     override fun onAddItemChose(listObj: ListObj) = presenter.onListObjAdded(listObj)
     override fun onItemRemoveRequested(listObj: ListObj) = presenter.removeListObj(listObj)
@@ -100,95 +185,53 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
     }
 
 
-
     override fun toggleClickInterception(visibility: Int) {
         click_layout.visibility = visibility
     }
 
-    override fun setClickInterceptionType(type: InterceptionTypes) {
-        clickInterceptionType = type
+
+    override fun onGenerateListObj(listObj: ListObj, cardPos: Int) {
+        val strToNarrate = state.cardDialog().displayCardContent(listObj, cardPos)
+        state.cardDialog().show()
+        narrateWord(strToNarrate)
     }
 
 
-    override fun onCardContentGeneratedObj(listObj: ListObj, cardPos: Int): String = state.cardDialog().displayCard(listObj, cardPos)
-
-
-    private fun onClickIntercepted() {
-        if (clickInterceptionType == InterceptionTypes.CARD_ONE)
-            presenter.narrateNextCardTwo()
-        else if (clickInterceptionType == InterceptionTypes.CARD_TWO) {
-            //check if to disable from there the marking of the selected item (or leave it that way)
-            presenter.narrateNextCardOne()
-        }
+    override fun onCardGeneratedObj(listObj: ListObj, cardPos: Int) {
+        val strToNarrate = state.cardDialog().displayCardContent(listObj, cardPos)
+        narrateWord(strToNarrate)
     }
 
-    private fun onLongClickIntercepted(): Boolean {
-        if(clickInterceptionType == InterceptionTypes.CARD_ONE)
-            presenter.narratePreviousCardOne()
-        else
-            presenter.narratePreviousCardTwo()
-        return true
+    override fun narrateWord(strToNarrate: String) {
+        MainActivity.mTTS?.speak(strToNarrate, TextToSpeech.QUEUE_ADD, null)
     }
 
     //todo: list marking
-    private fun unMarkAllCountries() {
+    private fun unMarkAllListObj() {
         val countriesCount = presenter.listOfObjList().size
         for (i in 0 until countriesCount) {
             listView.findViewHolderForAdapterPosition(i).itemView.list_item_papa.isSelected = false
         }
     }
 
-    //todo: narration
     override fun onCardsDone() {
         state.cardDialog().dismiss()
-        unMarkAllCountries()
-        toggleRunBtnVisibility(View.VISIBLE)
+        unMarkAllListObj()
+        setViewsVisibility(View.VISIBLE, run_random_btn)
     }
 
-    private fun toggleRunBtnVisibility(visibility: Int) {
-        run_random_btn.visibility = visibility
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_list, container, false)
 
-
-    override fun popCardDialog() {
-        if(!state.cardDialog().isShowing)
-            state.cardDialog().show(InterceptionTypes.CARD_ONE)
-    }
-
-    override fun updateCardInput(interceptionType: InterceptionTypes, input: String) {
-        state.cardDialog().updateInput(interceptionType, input)
-    }
-
-
-    override fun onCardClicked(interceptionType: InterceptionTypes) {
-        when(interceptionType){
-            InterceptionTypes.CARD_ONE -> presenter.narrateNextCardTwo()
-            InterceptionTypes.CARD_TWO -> presenter.narrateNextCardOne()
-        }
-    }
-
-
-    override fun onCardLongClicked(interceptionType: InterceptionTypes): Boolean {
-        when (interceptionType) {
-            InterceptionTypes.CARD_ONE -> presenter.narratePreviousCardOne()
-            InterceptionTypes.CARD_TWO -> presenter.narratePreviousCardTwo()
-        }
-        return true
-    }
-
-    private fun setState() {
-        state = arguments.getSerializable(STATE_SERIALIZABLE_ID) as ListState
-        presenter.setState(state)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_countries, container, false)
     companion object {
-        fun newInstance(listState: ListState): ListFragment {
-            val listStateBundle = Bundle()
-            listStateBundle.putSerializable(STATE_SERIALIZABLE_ID, listState)
-            val lf = ListFragment()
-            lf.arguments = listStateBundle
-            return lf
-        }
+        fun newInstance(): ListFragment = ListFragment()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        presenter.saveLastClosedTab(tab_strip.tabIndex)
+    }
+
+    override fun onCardDialogDismissed() {
+        run_random_btn.visibility = View.VISIBLE
     }
 }

@@ -11,4 +11,5 @@ object LocalRepositoryBank {
     const val KEY_TABS_STRIP_ENTRIES = "tab_strip_entries"
     const val KEY_PREFIX_LIST_ENTRIES: String = "list_entries_"
     const val KEY_FROM_TO: String = "user_from_to_"
+    const val KEY_LAST_CLOSED_TAB: String = "last_closed_tab"
 }

@@ -10,55 +10,45 @@ import javax.inject.Inject
 import dagger.android.support.DaggerAppCompatActivity
 import android.speech.tts.TextToSpeech
 import android.content.Intent
+import android.support.v4.app.FragmentManager
 import android.support.v4.view.ViewPager
 import android.view.Menu
 import android.widget.Toast
-import com.osapps.capitalslearner.tools.extensions.views.NavigationTabStrip
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import android.view.MenuItem
-import com.osapps.capitalslearner.main.listfragment.model.states.ListStateFactory
-import com.osapps.capitalslearner.main.presentation.tabs.TabStripHandler
+import com.osapps.capitalslearner.tools.ToolBarActivity
 
 
 private const val ACT_CHECK_TTS_DATA: Int = 999
 
-class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.OnInitListener {
+class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.OnInitListener, ToolBarActivity {
+
+    override fun toggleBackIcon(visible: Boolean) {
+        supportActionBar?.setDisplayHomeAsUpEnabled(visible)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+    }
+
+    override fun supportFragmentManager(): FragmentManager = supportFragmentManager
 
     @Inject
     lateinit var presenter: MainActivityPresenter
-
-    @Inject
-    lateinit var tabStripHandler: TabStripHandler
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.toolbar))
-
+        setSupportActionBar(toolbar)
 
         runNarratorIntent()
-
-        //added
-        setOnTabsClick()
     }
 
-    private fun setOnTabsClick() {
-    }
-
-
-    private fun onPageChangeListener(): ViewPager.OnPageChangeListener? {
-        val simpleListener = ViewPager.SimpleOnPageChangeListener()
-        return simpleListener
-
-    }
 
 
     //menu inflation
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.main_menu, menu)
+        menuInflater.inflate(R.menu.main_menu, menu)
+        menu.findItem(R.id.action_tabs_manager)
         return true
     }
 
@@ -66,12 +56,7 @@ class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.O
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
         when (item.itemId) {
-            R.id.action_add_tab -> {
-                val tabs = presenter.clickedAddTab()
-                refreshTabs(tabs)
-                return true
-            }
-            R.id.settings -> {
+            R.id.action_tabs_manager -> {
                 clickedSettings()
                 return true
             }
@@ -79,15 +64,13 @@ class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.O
         }
     }
 
-    private fun refreshTabs(tabStripEntries: Pair<Array<String>, Array<ListStateFactory.ListStateType>>) {
-        tab_strip.titles = tabStripEntries.first
-        tab_strip.setTypes(tabStripEntries.second)
+
+    override fun setToolBarTitle(title: String) {
+        supportActionBar?.title = title
     }
 
     //should be in different activity. the user should not see that tabs when he click here!
-    override fun clickedSettings() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun clickedSettings() = presenter.toSettings()
 
 
     //todo: remove redundant stuff from here!
@@ -122,10 +105,8 @@ class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.O
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Toast.makeText(this, "TTS language is not supported",
                             Toast.LENGTH_LONG).show()
-                } else {
-                    setTabStrip()
+                } else
                     presenter.onViewLoaded()
-                }
             }
         } else {
             Toast.makeText(this, "TTS initialization failed",
@@ -136,20 +117,6 @@ class MainActivity : DaggerAppCompatActivity(), MainActivityView, TextToSpeech.O
 
 
 
-    private fun setTabStrip() {
-
-        //set the entries (titles and types)
-        val tabStripEntries = presenter.getTabStripEntries()
-        refreshTabs(tabStripEntries)
-
-        //set onclick
-        tab_strip.onTabStripSelectedIndexListener = object : NavigationTabStrip.OnTabStripSelectedIndexListener {
-            override fun onStartTabSelected(title: String, index: Int) {}
-            override fun onEndTabSelected(title: String?, type: ListStateFactory.ListStateType?, index: Int)
-                    = presenter.onTabChanged(this@MainActivity, title!!, type!!)
-
-        }
-    }
 
     companion object { var mTTS: TextToSpeech? = null }
 

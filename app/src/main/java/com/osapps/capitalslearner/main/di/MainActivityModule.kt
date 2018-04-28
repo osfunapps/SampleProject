@@ -1,8 +1,13 @@
 package com.osapps.capitalslearner.main.di
 
+import android.content.Context
 import com.osapps.capitalslearner.dagger.scope.PerActivity
+import com.osapps.capitalslearner.infrastructure.LocalRepository
 import com.osapps.capitalslearner.main.presentation.MainActivityPresenter
 import com.osapps.capitalslearner.main.presentation.MainActivityPresenterImpl
+import com.osapps.capitalslearner.main.presentation.MainNavigator
+import com.osapps.capitalslearner.main.presentation.tabs.TabStripHandler
+import com.osapps.capitalslearner.main.presentation.tabs.TabsOrders
 import com.osapps.capitalslearner.main.view.MainActivity
 import com.osapps.capitalslearner.main.view.MainActivityView
 
@@ -34,9 +39,13 @@ class MainActivityModule {
 
     @Provides
     @PerActivity
-    fun provideMainPresenter(mainActivityView: MainActivityView): MainActivityPresenter {
-        return MainActivityPresenterImpl(mainActivityView)
+    fun provideMainPresenter(mainActivityView: MainActivityView, mainNavigator: MainNavigator): MainActivityPresenter {
+        return MainActivityPresenterImpl(mainActivityView, mainNavigator)
     }
+
+    @Provides
+    @PerActivity
+    fun provideMainNavigator(activity: MainActivity) = MainNavigator(activity)
 
 
 }

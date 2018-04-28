@@ -1,25 +1,38 @@
 package com.osapps.capitalslearner.main.listfragment.model.states
 
-import android.app.Activity
 import com.osapps.capitalslearner.main.listfragment.model.states.types.definition.DefinitionState
 import com.osapps.capitalslearner.main.listfragment.model.states.types.translation.TranslationState
-import java.lang.ref.WeakReference
+import com.osapps.capitalslearner.main.model.TabObj
+import java.io.Serializable
 
 /**
  * Created by osapps on 21/04/2018.
  */
+
+//the states types!
+enum class ListStateType(var styleName: String) : Serializable {
+    NO_STYLE("--Please Select --"),
+    TRANSLATION_STYLE("One word definition style"),
+    DEFINITION_STYLE("Question and answer explanation style");
+
+    @Override
+    override fun toString(): String  = styleName
+}
+
 object ListStateFactory {
-    enum class ListStateType {TRANSLATION_STYLE, DEFINITION_STYLE}
 
-    fun createListState(activity: Activity, type: ListStateType, name: String): ListState {
+    fun fromTabObjToState(tabObj: TabObj): ListState {
+        val type = tabObj.type
+        val name = tabObj.name
 
-        val wra = WeakReference<Activity>(activity)
         return when(type){
-            ListStateFactory.ListStateType.TRANSLATION_STYLE ->
-                TranslationState(wra, name)
+            ListStateType.TRANSLATION_STYLE ->
+                TranslationState(name)
 
-            ListStateFactory.ListStateType.DEFINITION_STYLE ->
-                DefinitionState()
+            ListStateType.DEFINITION_STYLE ->
+                DefinitionState(name)
+            else -> { throw RuntimeException("You got no style!")
+            }
         }
 
     }

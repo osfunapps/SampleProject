@@ -1,17 +1,23 @@
 package com.osapps.capitalslearner.main.presentation
 
-import android.content.Context
 import com.osapps.capitalslearner.R
-import com.osapps.capitalslearner.main.listfragment.model.states.ListState
-import com.osapps.capitalslearner.main.listfragment.view.ListFragment
+import com.osapps.capitalslearner.itzik.extenstions.addFragmentBackStack
 import com.osapps.capitalslearner.main.view.MainActivity
-import com.osapps.capitalslearner.tools.extensions.addFragment
+import com.osapps.capitalslearner.itzik.extenstions.replaceFragment
+import com.osapps.capitalslearner.main.listfragment.view.ListFragment
+import com.osapps.capitalslearner.main.settingsfragment.view.TabsManagerFrag
 
-class MainNavigator(internal val activity: MainActivity, internal val context: Context) {
+class MainNavigator(internal val activity: MainActivity) {
 
-    fun toListFragment(listState: ListState) {
-        activity.addFragment("listFragment", R.id.fragment_container) {
-            ListFragment.newInstance(listState)
+    fun toListFragment() {
+        activity.replaceFragment(Finals.TAG_FRAGMENT_LIST, R.id.fragment_container) {
+            ListFragment.newInstance()
+        }
+    }
+
+    fun toSettings() {
+        activity.addFragmentBackStack(Finals.TAG_FRAGMENT_TABS_MANAGER, R.id.fragment_container) {
+            TabsManagerFrag.newInstance()
         }
     }
 }

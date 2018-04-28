@@ -1,8 +1,9 @@
 package com.osapps.capitalslearner.dagger
 
 import com.osapps.capitalslearner.dagger.scope.PerActivity
-import com.osapps.capitalslearner.main.di.CountriesFragmentProvider
+import com.osapps.capitalslearner.main.di.ListFragmentProvider
 import com.osapps.capitalslearner.main.di.MainActivityModule
+import com.osapps.capitalslearner.main.di.TabsManagerFragmentProvider
 import com.osapps.capitalslearner.main.view.MainActivity
 
 import dagger.Module
@@ -29,8 +30,11 @@ abstract class ActivityBuilder {
     @PerActivity
     @ContributesAndroidInjector(modules = [
         MainActivityModule::class,  //the activity module
-        CountriesFragmentProvider::class
+        ListFragmentProvider::class,
+        TabsManagerFragmentProvider::class
     ])
+
+
     internal abstract fun bindMainActivity(): MainActivity
 
 
