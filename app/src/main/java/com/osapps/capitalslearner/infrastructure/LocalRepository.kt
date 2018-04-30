@@ -1,9 +1,5 @@
 package com.osapps.capitalslearner.infrastructure
 
-import com.osapps.capitalslearner.main.listfragment.model.states.types.translation.TranslationListObj
-import com.osapps.capitalslearner.main.model.TabObj
-import kotlin.reflect.KClass
-
 interface LocalRepository{
 
 

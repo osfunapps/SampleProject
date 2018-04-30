@@ -22,4 +22,8 @@
     <string name="to_definition_hint">To: Event</string>
     <string name="from_translation_hint">Like: Spanish</string>
     <string name="to_translation_hint">To: Hebrew</string>
+    <string name="go">Go</string>
+    <string name="entries_count">total entries: %1$s</string>
+    <string name="entries_hard_count">hard entries: %1$s</string>
+    <string name="namba_no_good">namba no good bra</string>
 </resources>

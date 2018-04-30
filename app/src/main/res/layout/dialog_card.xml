@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_centerHorizontal="true"
+    android:padding="16dp"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -19,6 +20,7 @@
         android:layout_height="wrap_content"
         />
 
+
     <TextView
         android:id="@+id/card_input_name"
         android:textSize="55sp"
@@ -33,11 +35,37 @@
         android:layout_height="wrap_content"
         />
 
+    <ToggleButton
+        android:id="@+id/hard_words_selection_iv"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:textOff=""
+        android:textOn=""
+        android:background="@drawable/hard_words_selector"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBaseline_toBaselineOf="@id/card_input_type"
+        />
+
+
+    <ImageView
+        android:id="@+id/go_back_iv"
+        android:layout_width="30dp"
+        android:padding="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="8dp"
+        android:layout_height="30dp"
+        android:background="@drawable/ic_brain"
+        />
 
     <LinearLayout
         android:id="@+id/clicks_interceptor"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        app:layout_constraintTop_toBottomOf="@id/hard_words_selection_iv"
+        android:layout_marginTop="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="0dp">
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

@@ -12,6 +12,8 @@ import com.osapps.capitalslearner.main.listfragment.model.ListObj
 import com.osapps.capitalslearner.main.listfragment.model.states.ListState
 import com.osapps.capitalslearner.main.listfragment.model.states.ListStateType
 import com.osapps.capitalslearner.main.listfragment.presentation.ListFragPresenter
+import com.osapps.capitalslearner.main.listfragment.view.dialogs.RandomWordsDialog
+import com.osapps.capitalslearner.main.listfragment.view.dialogs.RandomWordsDialogCallback
 import com.osapps.capitalslearner.main.listfragment.view.dialogs.types.*
 
 import javax.inject.Inject
@@ -30,12 +32,12 @@ import kotlinx.android.synthetic.main.fragment_list.*
  * Created by osApps on 02/06/2017.
  */
 
-class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, RemoveListObjDialogCallback, CardDialogCallback {
+class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, RemoveListObjDialogCallback, CardDialogCallback, RandomWordsDialogCallback {
+
     //instances
     private lateinit var listView: RecyclerView
     private lateinit var state: ListState
     @Inject lateinit var presenter: ListFragPresenter
-
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -124,7 +126,7 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
         state.setCardDialogCallback(this)
     }
 
-    override fun loadAdapter(listObjList: ArrayList<in ListObj>?) {
+    override fun loadAdapter(listObjList: ArrayList<ListObj>?) {
         //load the adapter here
         state.listAdapter().load(listObjList)
     }
@@ -145,6 +147,8 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
     }
 
 
+    private var randomWordsDialog: RandomWordsDialog? = null
+
     private fun setOnClicks() {
         //fab clicker
         list_fab.setOnClickListener { state.addDialog().show() }
@@ -152,9 +156,10 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
 
         //random btn clicker
         run_random_btn.setOnClickListener {
-            if(presenter.listOfObjList().size != 0) {
-                presenter.startRandomCycleSequence()
-                setViewsVisibility(View.GONE, run_random_btn)
+            if(presenter.getListOfObjList().size != 0) {
+                //call dialog to check how many random entries
+                if(randomWordsDialog == null) randomWordsDialog = RandomWordsDialog(activity!!, this)
+                randomWordsDialog!!.show(presenter.getListOfObjList(), presenter.getListOfObjList(true))
             }
         }
 
@@ -163,6 +168,14 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
         add_tab_big_iv.setOnClickListener { onAddTabClicked() }
     }
 
+    override fun onRandomWordsChose(randomList: ArrayList<ListObj>){
+        startRandomCycle(randomList)
+    }
+
+    private fun startRandomCycle(randomList: ArrayList<ListObj>){
+        presenter.startRandomCycleSequence(randomList)
+        setViewsVisibility(View.GONE, run_random_btn)
+    }
     override fun prepareViewWithoutTabs() {
         setViewsVisibility(View.VISIBLE, add_tab_big_iv)
         setViewsVisibility(View.GONE, list_fab, run_random_btn, add_list_obj)
@@ -171,8 +184,12 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
     override fun prepareViewWithoutListItems(){
         setViewsVisibility(View.GONE, run_random_btn, add_tab_big_iv, list_fab)
         setViewsVisibility(View.VISIBLE, add_list_obj)
+        //injectCountries(presenter)
 
+        //injectCountries()
     }
+
+
     override fun onListUpdated() = state.listAdapter().notifyDataSetChanged()
 
 
@@ -191,16 +208,24 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
 
 
     override fun onGenerateListObj(listObj: ListObj, cardPos: Int) {
-        val strToNarrate = state.cardDialog().displayCardContent(listObj, cardPos)
+
+        //todo ozzz: see if word is hard.
+        val strToNarrate = popCardDialog(listObj, cardPos)
         state.cardDialog().show()
         narrateWord(strToNarrate)
     }
 
 
     override fun onCardGeneratedObj(listObj: ListObj, cardPos: Int) {
-        val strToNarrate = state.cardDialog().displayCardContent(listObj, cardPos)
+        val strToNarrate = popCardDialog(listObj, cardPos)
         narrateWord(strToNarrate)
     }
+
+    private fun popCardDialog(listObj: ListObj, cardPos: Int) : String {
+        presenter.setCurrentListObj(listObj)
+        return state.cardDialog().displayCardContent(listObj, cardPos, presenter.isHardWord())
+    }
+
 
     override fun narrateWord(strToNarrate: String) {
         MainActivity.mTTS?.speak(strToNarrate, TextToSpeech.QUEUE_ADD, null)
@@ -208,10 +233,10 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
 
     //todo: list marking
     private fun unMarkAllListObj() {
-        val countriesCount = presenter.listOfObjList().size
+      /*  val countriesCount = presenter.getListOfObjList().size
         for (i in 0 until countriesCount) {
             listView.findViewHolderForAdapterPosition(i).itemView.list_item_papa.isSelected = false
-        }
+        }*/
     }
 
     override fun onCardsDone() {
@@ -234,4 +259,10 @@ class ListFragment : DaggerFragment(), ListFragView, AddListObjDialogCallback, R
     override fun onCardDialogDismissed() {
         run_random_btn.visibility = View.VISIBLE
     }
+
+    override fun onCardBackClicked() = presenter.onCardBackClicked()
+
+    override fun onHardRandomWordsChose(randomList: java.util.ArrayList<ListObj>) = startRandomCycle(randomList)
+    override fun handleHardWord(addRequest: Boolean) = presenter.onRequestToAlterHardWord(addRequest)
+
 }

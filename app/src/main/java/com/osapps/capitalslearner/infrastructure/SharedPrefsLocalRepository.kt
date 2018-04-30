@@ -2,14 +2,6 @@ package com.osapps.capitalslearner.infrastructure
 
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.google.gson.internal.bind.ObjectTypeAdapter
-import com.google.gson.reflect.TypeToken
-import java.lang.reflect.Type
-import kotlin.reflect.KClass
-import com.osapps.capitalslearner.main.listfragment.model.states.types.translation.TranslationListObj
-import com.osapps.capitalslearner.main.model.TabObj
-
-
 
 
 class SharedPrefsLocalRepository(private val preferences: SharedPreferences) : LocalRepository {

@@ -33,14 +33,14 @@ interface ListState: Serializable {
     /*
     should return the adapter which extends the list adapter.
     //the adapter should hold a load() function which loads all of the parameters in it
-    //val lst = listObjList as ArrayList<TranslationListObj>
+    //val lst = listObjList as ArrayList<ListObj>
      */
     fun listAdapter(): ListAdapter
 
     /**
      * returns a list of list items which will populate the list
      */
-    fun listOfObjList(localRepository: LocalRepository): ArrayList<in ListObj>
+    fun listOfObjList(localRepository: LocalRepository, hard: Boolean = false): ArrayList<ListObj>
 
 
     /**
@@ -62,5 +62,6 @@ interface ListState: Serializable {
     fun setRemoveDialogCallback(callback: RemoveListObjDialogCallback)
     fun setAddDialogCallback(callback: AddListObjDialogCallback)
     fun setCardDialogCallback(callback: CardDialogCallback)
+    fun localRepoHardEntriesKey(): String
 
 }
